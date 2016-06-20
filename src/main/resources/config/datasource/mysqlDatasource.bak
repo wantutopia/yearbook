@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="dataSourceForYearbook2" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://yearbook.civgn8fy06yy.ap-northeast-2.rds.amazonaws.com&amp;connectTimeout=2000&amp;socketTimeout=3000" />
+		<property name="username" value="wantutopia" />
+		<property name="password" value="gmrgorhf77" />
+		<property name="initialSize" value="10" />
+		<property name="maxTotal" value="10" />
+		<property name="maxIdle" value="10" />
+		<property name="minIdle" value="5" />
+		<property name="validationQuery" value="select 1" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="testWhileIdle" value="true" />
+		<property name="timeBetweenEvictionRunsMillis" value="1800000" />
+		<property name="numTestsPerEvictionRun" value="5" />
+		<property name="minEvictableIdleTimeMillis" value="1" />
+	</bean>
+
+
+	<bean id="dataSourceForYearbook" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="#{datasourceConfig['mysql.master.jdbc.url']}#{datasourceConfig['mysql.connection.timetout']}" />
+		<property name="username" value="#{datasourceConfig['mysql.jdbc.username']}" />
+		<property name="password" value="#{datasourceConfig['mysql.jdbc.password']}" />
+		<property name="initialSize" value="#{datasourceConfig['mysql.initialSize']}" />
+		<property name="maxTotal" value="#{datasourceConfig['mysql.maxTotal']}" />
+		<property name="maxIdle" value="#{datasourceConfig['mysql.maxIdle']}" />
+		<property name="minIdle" value="#{datasourceConfig['mysql.minIdle']}" />
+		<property name="validationQuery" value="select 1" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="testWhileIdle" value="true" />
+		<property name="timeBetweenEvictionRunsMillis" value="1800000" />
+		<property name="numTestsPerEvictionRun" value="5" />
+		<property name="minEvictableIdleTimeMillis" value="1" />
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSourceForYearbook"/>
+		<property name="mapperLocations" value="classpath*:com/yearbook/**/**"/>
+		<property name="plugins">
+			<list>
+				<bean class="com.nhncorp.lucy.spring.db.mybatis.plugin.BindingLogPlugin"/>
+				<bean class="com.nhncorp.lucy.spring.db.mybatis.plugin.SlowQueryPlugin">
+					<property name="slowQueryTime" value="#{datasourceConfig['slowquery.timeout.millisec']}"></property>
+				</bean>
+				<bean class="com.nhncorp.lucy.spring.db.mybatis.plugin.StatementIdAppenderPlugin"/>
+			</list>
+		</property>
+	</bean>
+</beans>
+
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yearbook.repository.testBed.TestBed">
+
+    <select id="selectTestBedAll" resultType="com.yearbook.model.testBed.TestBed">
+        SELECT *
+        FROM test_bed;
+    </select>
+
+</mapper>

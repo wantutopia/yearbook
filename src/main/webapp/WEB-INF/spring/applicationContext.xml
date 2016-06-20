@@ -1,9 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:util="http://www.springframework.org/schema/util" xmlns:tx="http://www.springframework.org/schema/tx"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<util:properties id="commonConfig" location="classpath:config/common/${phase}.config.properties"/>
+	<util:properties id="datasourceConfig" location="classpath:config/datasource/${phase}.datasource.config.properties"/>
+
+	<bean id="dataSourceForYearbook" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://yearbook.civgn8fy06yy.ap-northeast-2.rds.amazonaws.com:3306/yearbook" />
+		<property name="username" value="#{datasourceConfig['mysql.jdbc.username']}" />
+		<property name="password" value="#{datasourceConfig['mysql.jdbc.password']}" />
+		<property name="initialSize" value="#{datasourceConfig['mysql.initialSize']}" />
+		<property name="maxActive" value="#{datasourceConfig['mysql.maxTotal']}" />
+		<property name="maxIdle" value="#{datasourceConfig['mysql.maxIdle']}" />
+		<property name="minIdle" value="#{datasourceConfig['mysql.minIdle']}" />
+		<property name="validationQuery" value="select 1" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		<property name="testWhileIdle" value="true" />
+		<property name="timeBetweenEvictionRunsMillis" value="1800000" />
+		<property name="numTestsPerEvictionRun" value="5" />
+		<property name="minEvictableIdleTimeMillis" value="1" />
+	</bean>
+
+	<bean id="sqlSessionFactoryForYearbook" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSourceForYearbook"></property>
+		<property name="mapperLocations" value="classpath*:**/*SqlMap.xml" />
+		<property name="configLocation" value="classpath:config/datasource/sqlMapConfig.xml" />
+	</bean>
+
+	<bean id="sqlSessionTemplateForYearbook" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactoryForYearbook"></constructor-arg>
+	</bean>
+
+	<bean id="transactionManagerForBO" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSourceForYearbook" />
+	</bean>
+
+	<tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManagerForBO"/>
 </beans>
